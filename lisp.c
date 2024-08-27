@@ -266,6 +266,16 @@ lval* builtin_tail(lval* a) {
   return v;
 }
 
+lval* builtin_init(lval* a){
+  LASSERT(a, a->count == 1, "Function 'tail' passed too many arguments!");
+  LASSERT(a, a->cell[0]->type == LVAL_QEXPR, "Function 'tail' passed incorrect types!");
+  LASSERT(a, a->cell[0]->count != 0, "Function 'init' passed {}!");
+
+  lval* v =lval_take(a,0);
+  lval_del(lval_pop(v,v->count-1));
+  return v;
+
+}
 lval* builtin_eval(lval* a) {
   LASSERT(a, a->count == 1, "Function 'eval' passed too many arguments!");
   LASSERT(a, a->cell[0]->type == LVAL_QEXPR, "Function 'eval' passed incorrect types!");
@@ -334,7 +344,8 @@ lval* builtin_op(lval* a, char* op) {
 }
 
 lval* builtin(lval* a, char* func) {
-  if (strcmp("len",func)==0) {return builtin_len(a);}
+  if (strcmp("init",func) ==0 ) {return builtin_init(a);}
+  if (strcmp("len",func) ==0 ) {return builtin_len(a);}
   if (strcmp("list", func) == 0) { return builtin_list(a); }
   if (strcmp("head", func) == 0) { return builtin_head(a); }
   if (strcmp("tail", func) == 0) { return builtin_tail(a); }
@@ -418,7 +429,7 @@ int main(int argc, char** argv) {
     "                                                     \
       number   : /-?[0-9]+/ ;                             \
       symbol : '+' | '-' | '*' | '/' | '%' | '^' | \"max\" \
-      | \"min\" | \"avg\"  | \"len\"                                 \
+      | \"min\" | \"avg\"  | \"len\" | \"init\"                                \
       | \"eval\" | \"join\" | \"list\" | \"head\" | \"tail\"; \
       sexpr    : '(' <expr>* ')' ;                        \
       qexpr    : '{' <expr>* '}' ;                        \
