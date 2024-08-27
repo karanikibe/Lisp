@@ -246,6 +246,27 @@ lval* builtin_len(lval* a){
   lval_del(a);
   return lval_num(len);
 }
+
+lval* builtin_cons(lval*a){
+  LASSERT(a, a->count == 2, "Function 'cons' passed too many arguments!");
+  LASSERT(a, a->cell[1]->type == LVAL_QEXPR, "Function 'cons' passed incorrect types!");
+  //LASSERT(a, a->cell[1]->type!= LVAL_QEXPR, "Function 'cons' passed incorrect types!");
+
+  lval* x = lval_pop(a,0);//Extract the value to be appended
+  lval* y = lval_pop(a,0);//Extract q expression
+
+  lval* new_qexpr = lval_qexpr();
+  new_qexpr = lval_add(new_qexpr,x);
+
+  while(y->count > 0){
+    new_qexpr = lval_add(new_qexpr,lval_pop(y,0));
+  }
+
+  lval_del(y);
+  lval_del(a);
+  return new_qexpr;
+
+}
 lval* builtin_head(lval* a) {
   LASSERT(a, a->count == 1, "Function 'head' passed too many arguments!");
   LASSERT(a, a->cell[0]->type == LVAL_QEXPR, "Function 'head' passed incorrect types!");
@@ -344,6 +365,7 @@ lval* builtin_op(lval* a, char* op) {
 }
 
 lval* builtin(lval* a, char* func) {
+  if (strcmp("cons",func)==0) {return builtin_cons(a);}
   if (strcmp("init",func) ==0 ) {return builtin_init(a);}
   if (strcmp("len",func) ==0 ) {return builtin_len(a);}
   if (strcmp("list", func) == 0) { return builtin_list(a); }
@@ -429,7 +451,7 @@ int main(int argc, char** argv) {
     "                                                     \
       number   : /-?[0-9]+/ ;                             \
       symbol : '+' | '-' | '*' | '/' | '%' | '^' | \"max\" \
-      | \"min\" | \"avg\"  | \"len\" | \"init\"                                \
+      | \"min\" | \"avg\"  | \"len\" | \"init\"  | \"cons\"          \
       | \"eval\" | \"join\" | \"list\" | \"head\" | \"tail\"; \
       sexpr    : '(' <expr>* ')' ;                        \
       qexpr    : '{' <expr>* '}' ;                        \
